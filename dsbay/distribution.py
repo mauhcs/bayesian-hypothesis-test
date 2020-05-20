@@ -19,30 +19,29 @@ class DistributionMass:
 
     def get_HDI(self, credMass=0.95):
         probMassVec = list(self.dist.values())
-        thetaValues = list(self.dist.keys())
         probMassArr = np.sort(np.array(probMassVec))[::-1]
-        arr = np.where(probMassArr.cumsum()>= credMass)
-        heightIX = arr[0][0]
-        if heightIX == 0: # If one discrete value is enough for the credMass threashold
-            r = thetaValues[probMassVec.index(probMassArr[0])]
-            return r, r
-        IXS = [probMassVec.index(probMassArr[i]) for i in range(heightIX+1)]
-        _left  = min(thetaValues[min(IXS)], thetaValues[max(IXS)])
-        _right = max(thetaValues[min(IXS)], thetaValues[max(IXS)])
-        return _left, _right+1
+        threshold_ix = np.where(probMassArr.cumsum() >= credMass)[0][0]
+
+        probMassList = list(self.dist.items())
+        probMassOrderedArr = np.array(sorted(probMassList, key = lambda x: x[1], reverse=True))
+        return {k:v for (k,v) in probMassOrderedArr[threshold_ix+1:]}
 
     def plot(self):
         x = list(self.dist.keys())
         y = list(self.dist.values())
-        _left, _right = self.get_HDI()
-        CIX = x[:x.index(_left)+1], x[x.index(_right):]
-        CIY = y[:x.index(_left)+1], y[x.index(_right):]
+        ci_dist = self.get_HDI()
+        CIX = list(ci_dist.keys())
+        CIY = list(ci_dist.values())
         # suggestions: cool, 
         colors = [matplotlib.cm.get_cmap('cool')(2*i/len(x)) for i in range(len(x))]
+        plt.figure(figsize=(13,4))
         plt.bar(x, y, color=colors)
         ax = plt.gca()
-        ax.bar(CIX[0], CIY[0], alpha=0.1, hatch = 'x')
-        ax.bar(CIX[1], CIY[1], alpha=0.1, hatch = 'x', label="Critical Area")
+        ax.bar(CIX, CIY, alpha=0.1, hatch = '//', label="Critical Area")        
+        ax.get_yaxis().set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+
         plt.legend()
-        plt.show()
         return ax
