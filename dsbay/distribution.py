@@ -1,8 +1,3 @@
-import matplotlib
-import numpy as np
-import matplotlib.pyplot as plt
-
-
 class DistributionMass:
 
     def __init__(self, x=None, y=None, distribution_dict=None):
@@ -33,11 +28,12 @@ class DistributionMass:
         CIX = list(ci_dist.keys())
         CIY = list(ci_dist.values())
         # suggestions: cool, 
-        colors = [matplotlib.cm.get_cmap('cool')(2*i/len(x)) for i in range(len(x))]
-        plt.figure(figsize=(13,4))
-        plt.bar(x, y, color=colors)
+        colors = [matplotlib.cm.get_cmap('cool')(i/len(x)) for i in range(len(x))]
+        plt.figure(figsize=(10,3))
+        _width =max([x[i] - x[i-1] for i in range(len(x))])*0.7
+        plt.bar(x, y, color=colors, width=_width)
         ax = plt.gca()
-        ax.bar(CIX, CIY, alpha=0.1, hatch = '//', label="Critical Area")        
+        ax.bar(CIX, CIY, alpha=0.1, hatch = '//', label="Critical Area", width=_width)        
         ax.get_yaxis().set_visible(False)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
